@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" fill="#050506"/>
+  <!-- Losango (ponto do i) — motivo central da marca -->
+  <g transform="translate(32 32)">
+    <rect x="-15" y="-15" width="30" height="30" transform="rotate(45)" fill="#F4F4F1"/>
+    <rect x="-15" y="-15" width="30" height="30" transform="rotate(45)" fill="none" stroke="#6FA8FF" stroke-width="2" opacity="0.55"/>
+  </g>
+</svg>

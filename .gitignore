@@ -1,0 +1,19 @@
+# Dependências e builds
+node_modules/
+dist/
+dist-ssr/
+**/node_modules/
+**/dist/
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+*.local
+.vite/
+.vscode/
+.idea/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

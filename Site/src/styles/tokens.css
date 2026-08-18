@@ -1,0 +1,120 @@
+/* =============================================================================
+   IMPERIUM PRIMUS — DESIGN TOKENS
+   Todos os valores nascem da leitura da logo (ip-mark.png):
+   monograma de fitas branco-prata sobre preto, com rim-light azul-frio nas
+   arestas e construção isométrica (~30°). Tudo aqui é fonte única de verdade.
+   ============================================================================= */
+
+:root {
+  /* --- Superfícies / tinta (mono controlado) --------------------------------- */
+  --void: #050506;        /* fundo quase-preto (base do site) */
+  --ink: #0b0c0e;         /* superfície elevada 1 */
+  --surface-1: #101216;   /* superfície elevada 2 */
+  --surface-2: #16181c;   /* cartões/painéis discretos */
+  --surface-3: #1e2127;   /* hover de superfície */
+  --line: #24272d;        /* divisórias */
+  --line-strong: #3a3e46; /* divisórias com mais presença */
+
+  /* --- Papel / branco-prata do mark ----------------------------------------- */
+  --paper: #f4f4f1;       /* branco-prata (texto/estruturas principais) */
+  --paper-dim: #c9cbd0;   /* texto secundário */
+  --muted: #8a8f98;       /* texto terciário / legendas */
+  --muted-deep: #5b606a;  /* rótulos, metadados */
+
+  /* --- Acento: rim-light azul-frio (SÓ arestas, foco, detalhe) --------------- */
+  --edge: #6fa8ff;        /* linha de luz da fita */
+  --edge-soft: #a9c8ff;   /* variação clara */
+  --edge-deep: #2f5fb0;   /* variação profunda (sombra fria) */
+  --edge-glow: rgba(111, 168, 255, 0.35);
+
+  /* --- Cor de marca aplicada ------------------------------------------------- */
+  --bg: var(--void);
+  --fg: var(--paper);
+  --accent: var(--edge);
+
+  /* --- Tipografia ------------------------------------------------------------ */
+  --font-display: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter Variable", "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", monospace;
+
+  /* Escala modular ~1.25 (major third), fluida via clamp                       */
+  --step--1: clamp(0.78rem, 0.75rem + 0.15vw, 0.86rem);
+  --step-0: clamp(0.95rem, 0.9rem + 0.25vw, 1.06rem);
+  --step-1: clamp(1.18rem, 1.05rem + 0.6vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.25rem + 1.2vw, 2.15rem);
+  --step-3: clamp(1.95rem, 1.5rem + 2.2vw, 3.05rem);
+  --step-4: clamp(2.5rem, 1.7rem + 3.9vw, 4.4rem);
+  --step-5: clamp(3.1rem, 1.6rem + 6.8vw, 6.6rem);
+  --step-6: clamp(3.6rem, 0.5rem + 12vw, 9rem);   /* displays cinematográficos */
+
+  --tracking-tight: -0.03em;
+  --tracking-snug: -0.015em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.08em;
+  --tracking-label: 0.22em;   /* rótulos em caixa-alta */
+
+  --leading-tight: 1.02;
+  --leading-snug: 1.14;
+  --leading-body: 1.62;
+
+  /* --- Espaçamento (base 4px, ritmo de fita) --------------------------------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+  --space-10: 11rem;
+  --section-gap: clamp(3.5rem, 2.5rem + 4.5vw, 7rem);
+
+  /* --- Layout ---------------------------------------------------------------- */
+  --container: 76rem;      /* 1216px */
+  --container-wide: 88rem;
+  --gutter: clamp(1.25rem, 0.6rem + 3vw, 3rem);
+  --content-measure: 62ch;
+
+  /* --- Geometria da fita ----------------------------------------------------- */
+  --ribbon-w: clamp(14px, 1.4vw, 22px);   /* espessura da fita = unidade de linha */
+  --iso-angle: 30deg;                     /* ângulo isométrico da logo */
+  --radius: 2px;                          /* radius mínimo — nada arredondado */
+  --radius-2: 4px;
+
+  /* --- Elevação (profundidade por luz de aresta, não drop-shadow pesado) ----- */
+  --shadow-1: 0 1px 0 rgba(244, 244, 241, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 2px 24px rgba(0, 0, 0, 0.45);
+  --hairline: inset 0 0 0 1px var(--line);
+  --hairline-lit: inset 0 0 0 1px rgba(111, 168, 255, 0.35);
+
+  /* --- Motion System (linguagem única) --------------------------------------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);        /* out-expo controlado */
+  --ease-out-strong: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);     /* transições espaciais */
+  --ease-mech: cubic-bezier(0.83, 0, 0.17, 1);       /* "mecânico" p/ dobras */
+
+  --dur-micro: 140ms;
+  --dur-fast: 240ms;
+  --dur-base: 420ms;
+  --dur-slow: 680ms;
+  --stagger: 60ms;
+
+  /* --- Z-index --------------------------------------------------------------- */
+  --z-ribbon: 5;
+  --z-content: 10;
+  --z-header: 40;
+  --z-overlay: 60;
+  --z-cursor: 90;
+
+  /* --- Grão/textura ---------------------------------------------------------- */
+  --grain-opacity: 0.035;
+}
+
+/* Densidade tipográfica ligeiramente diferente no mobile */
+@media (max-width: 640px) {
+  :root {
+    --leading-body: 1.56;
+    --section-gap: clamp(3rem, 2rem + 8vw, 5rem);
+  }
+}

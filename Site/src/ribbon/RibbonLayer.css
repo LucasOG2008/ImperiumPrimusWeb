@@ -1,0 +1,40 @@
+/* Camada da fita — absoluta sobre todo o documento, atrás do conteúdo. */
+.ribbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--z-ribbon);
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Corpo da fita: banda com cantos vivos (miter) — folded-ribbon rígido. */
+.ribbon__band {
+  stroke: var(--line);
+  stroke-width: var(--ribbon-w);
+  stroke-linejoin: miter;
+  stroke-linecap: butt;
+  stroke-miterlimit: 8;
+}
+
+/* Chanfro/topo da banda — leve highlight que dá volume à fita. */
+.ribbon__core {
+  stroke: rgba(244, 244, 241, 0.07);
+  stroke-width: calc(var(--ribbon-w) - 7px);
+  stroke-linejoin: miter;
+  stroke-linecap: butt;
+  stroke-miterlimit: 8;
+}
+
+/* Linha de luz (rim-light azul) — a "corrente" que percorre a fita no scroll. */
+.ribbon__light {
+  stroke: url(#ribbonLight);
+  stroke-width: 2.2px;
+  stroke-linejoin: miter;
+  stroke-linecap: round;
+  stroke-miterlimit: 8;
+}
+
+@media (max-width: 768px) {
+  .ribbon__light { stroke-width: 1.8px; }
+}
