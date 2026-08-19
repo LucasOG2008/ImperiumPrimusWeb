@@ -33,10 +33,10 @@ export default function Hero() {
   const [use3D, setUse3D] = useState(false);
 
   useEffect(() => {
-    // Override opcional: ?motion=full força a experiência 3D mesmo com
-    // reduced-motion no SO (útil para pré-visualizar o hero completo).
-    const forceFull = new URLSearchParams(window.location.search).get("motion") === "full";
-    if ((!reduced || forceFull) && supportsWebGL() && window.innerWidth > 720) {
+    // O hero 3D carrega em desktop sempre que houver WebGL. Quando o usuário
+    // pede menos movimento, a logo aparece extrudada porém PARADA (sem a
+    // animação de entrada/flutuação) — todos veem o 3D, respeitando a preferência.
+    if (supportsWebGL() && window.innerWidth > 720) {
       const id = window.requestIdleCallback
         ? window.requestIdleCallback(() => setUse3D(true))
         : window.setTimeout(() => setUse3D(true), 200);
@@ -45,14 +45,14 @@ export default function Hero() {
         else clearTimeout(id as number);
       };
     }
-  }, [reduced]);
+  }, []);
 
   return (
     <section id="top" className="hero" aria-label="Apresentação">
       <div className={`hero__stage ${use3D ? "hero__stage--3d" : ""}`} aria-hidden="true">
         {use3D ? (
           <Suspense fallback={<LogoImage />}>
-            <RibbonHero />
+            <RibbonHero reduced={reduced} />
           </Suspense>
         ) : (
           <LogoImage />

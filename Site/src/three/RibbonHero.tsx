@@ -55,13 +55,30 @@ function buildPieces(): { pieces: Piece[]; scale: number } {
   return { pieces, scale };
 }
 
-function Logo({ pointer }: { pointer: React.MutableRefObject<{ x: number; y: number }> }) {
+function Logo({
+  pointer,
+  reduced = false,
+}: {
+  pointer: React.MutableRefObject<{ x: number; y: number }>;
+  reduced?: boolean;
+}) {
   const group = useRef<THREE.Group>(null);
   const meshes = useRef<(THREE.Mesh | null)[]>([]);
   const start = useRef<number | null>(null);
   const { pieces, scale } = useMemo(buildPieces, []);
 
   useFrame((state) => {
+    // Modo "reduzir movimento": a logo 3D aparece montada e imóvel.
+    if (reduced) {
+      pieces.forEach((_, i) => {
+        const m = meshes.current[i];
+        if (!m) return;
+        m.position.set(0, 0, 0);
+        (m.material as THREE.MeshStandardMaterial).opacity = 1;
+      });
+      return;
+    }
+
     if (start.current === null) start.current = state.clock.elapsedTime;
     const t = state.clock.elapsedTime - start.current;
 
@@ -116,7 +133,7 @@ function PointerCatcher({ onMove }: { onMove: (x: number, y: number) => void }) 
   );
 }
 
-export default function RibbonHero() {
+export default function RibbonHero({ reduced = false }: { reduced?: boolean }) {
   const pointer = useRef({ x: 0, y: 0 });
   return (
     <Canvas
@@ -132,13 +149,15 @@ export default function RibbonHero() {
       <directionalLight position={[-6, 3, 2]} intensity={0.6} color={"#a9c8ff"} />
       <ambientLight intensity={0.28} />
 
-      <PointerCatcher
-        onMove={(x, y) => {
-          pointer.current.x = x;
-          pointer.current.y = y;
-        }}
-      />
-      <Logo pointer={pointer} />
+      {!reduced && (
+        <PointerCatcher
+          onMove={(x, y) => {
+            pointer.current.x = x;
+            pointer.current.y = y;
+          }}
+        />
+      )}
+      <Logo pointer={pointer} reduced={reduced} />
     </Canvas>
   );
 }
