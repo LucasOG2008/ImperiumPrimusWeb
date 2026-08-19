@@ -8,7 +8,7 @@
   overflow: visible;
 }
 
-/* Corpo da fita: banda com cantos vivos (miter) — folded-ribbon rígido. */
+/* Trilho da fita: banda discreta sempre visível (cantos vivos, folded-ribbon). */
 .ribbon__band {
   stroke: var(--line);
   stroke-width: var(--ribbon-w);
@@ -17,24 +17,38 @@
   stroke-miterlimit: 8;
 }
 
-/* Chanfro/topo da banda — leve highlight que dá volume à fita. */
-.ribbon__core {
-  stroke: rgba(244, 244, 241, 0.07);
-  stroke-width: calc(var(--ribbon-w) - 7px);
+/* Corpo da FITA BRANCA — revelado pela máscara conforme o scroll. */
+.ribbon__tape {
+  stroke: var(--paper);
+  stroke-width: var(--ribbon-w);
   stroke-linejoin: miter;
   stroke-linecap: butt;
   stroke-miterlimit: 8;
 }
 
-/* Linha de luz (rim-light azul) — a "corrente" que percorre a fita no scroll. */
-.ribbon__light {
-  stroke: url(#ribbonLight);
-  stroke-width: 2.2px;
+/* Grade quadriculada sobre a fita (linhas finas escuras). */
+.ribbon__grid {
+  stroke: url(#ribbonGrid);
+  stroke-width: var(--ribbon-w);
   stroke-linejoin: miter;
-  stroke-linecap: round;
+  stroke-linecap: butt;
+  stroke-miterlimit: 8;
+}
+.ribbon__grid-line {
+  stroke: rgba(5, 5, 6, 0.4);
+  stroke-width: 1.2;
+}
+
+/* Traço da máscara: branco = revelado. Levemente mais largo que a fita para
+   cobrir as bordas anti-aliased. O desenrolar é feito via stroke-dashoffset. */
+.ribbon__reveal {
+  stroke: #fff;
+  stroke-width: calc(var(--ribbon-w) + 2px);
+  stroke-linejoin: miter;
+  stroke-linecap: butt;
   stroke-miterlimit: 8;
 }
 
 @media (max-width: 768px) {
-  .ribbon__light { stroke-width: 1.8px; }
+  .ribbon__grid-line { stroke-width: 1; }
 }

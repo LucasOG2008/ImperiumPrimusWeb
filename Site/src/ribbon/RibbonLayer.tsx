@@ -12,16 +12,17 @@ type Props = {
 
 /**
  * Camada única e persistente da fita: um SVG absoluto cobrindo todo o documento,
- * com UM path mestre. A "estrutura" (band) fica sempre visível; a linha de luz
- * azul (rim-light da logo) é desenhada conforme o scroll — vira o fio condutor e
- * o indicador de progresso da experiência inteira.
+ * com UM path mestre. Um trilho discreto (band) fica sempre visível; por cima,
+ * uma FITA BRANCA quadriculada (textura de grade, herança geométrica da logo)
+ * vai sendo "desenrolada" conforme o scroll — revelada por uma máscara que
+ * avança de cima para baixo. Vira o fio condutor e o indicador de progresso.
  */
 export default function RibbonLayer({ contentRef }: Props) {
   const reduced = useReducedMotion();
   const [dims, setDims] = useState({ w: 0, h: 0, mobile: false });
   const svgRef = useRef<SVGSVGElement>(null);
   const bandRef = useRef<SVGPathElement>(null);
-  const lightRef = useRef<SVGPathElement>(null);
+  const revealRef = useRef<SVGPathElement>(null);
 
   // Mede largura da viewport e altura do conteúdo; recomputa em resize.
   useLayoutEffect(() => {
@@ -52,22 +53,23 @@ export default function RibbonLayer({ contentRef }: Props) {
       : buildRibbonPath(dims.w, dims.h)
     : "";
 
-  // Desenho da luz conduzido pelo scroll (scrub). Respeita reduced-motion.
+  // Desenrolar da fita conduzido pelo scroll (scrub). A máscara avança de cima
+  // para baixo, revelando a fita branca quadriculada. Respeita reduced-motion.
   useEffect(() => {
-    const light = lightRef.current;
-    if (!light || !d) return;
+    const reveal = revealRef.current;
+    if (!reveal || !d) return;
 
-    const len = light.getTotalLength();
-    light.style.strokeDasharray = `${len}`;
+    const len = reveal.getTotalLength();
+    reveal.style.strokeDasharray = `${len}`;
 
     if (reduced) {
-      // versão elegante-reduzida: luz já desenhada, estática.
-      light.style.strokeDashoffset = "0";
+      // versão elegante-reduzida: fita já desenrolada, estática.
+      reveal.style.strokeDashoffset = "0";
       return;
     }
 
-    light.style.strokeDashoffset = `${len}`;
-    const tween = gsap.to(light, {
+    reveal.style.strokeDashoffset = `${len}`;
+    const tween = gsap.to(reveal, {
       strokeDashoffset: 0,
       ease: "none",
       scrollTrigger: {
@@ -101,36 +103,35 @@ export default function RibbonLayer({ contentRef }: Props) {
       focusable="false"
     >
       <defs>
-        <linearGradient id="ribbonLight" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="var(--edge-soft)" />
-          <stop offset="1" stopColor="var(--edge)" />
-        </linearGradient>
-        <filter id="ribbonGlow" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="3" result="b" />
-          <feMerge>
-            <feMergeNode in="b" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
+        {/* Textura quadriculada da fita (grade fina, herança geométrica da logo) */}
+        <pattern id="ribbonGrid" width="9" height="9" patternUnits="userSpaceOnUse">
+          <path className="ribbon__grid-line" d="M9 0V9M0 9H9" fill="none" />
+        </pattern>
+
+        {/* Máscara de desenrolar: o traço branco avança no scroll e revela a fita */}
+        <mask id="ribbonReveal" maskUnits="userSpaceOnUse">
+          <path
+            ref={revealRef}
+            className="ribbon__reveal"
+            d={d}
+            fill="none"
+          />
+        </mask>
       </defs>
 
-      {/* Estrutura da fita (band) — presença discreta, canto vivo */}
+      {/* Trilho da fita (band) — presença discreta, sempre visível */}
       <path
         ref={bandRef}
         className="ribbon__band"
         d={d}
         fill="none"
       />
-      {/* Núcleo da fita (levemente mais claro) */}
-      <path className="ribbon__core" d={d} fill="none" />
-      {/* Linha de luz azul — desenhada pelo scroll */}
-      <path
-        ref={lightRef}
-        className="ribbon__light"
-        d={d}
-        fill="none"
-        filter="url(#ribbonGlow)"
-      />
+
+      {/* Fita branca quadriculada — revelada pela máscara conforme o scroll */}
+      <g mask="url(#ribbonReveal)">
+        <path className="ribbon__tape" d={d} fill="none" />
+        <path className="ribbon__grid" d={d} fill="none" />
+      </g>
     </svg>
   );
 }
