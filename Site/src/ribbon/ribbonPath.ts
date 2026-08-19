@@ -10,20 +10,23 @@
 export type Anchor = { xf: number; yf: number }; // frações de largura/altura
 
 // Âncoras do percurso (topo → base). xf: 0 = esquerda, 1 = direita.
-// Pensadas para acompanhar a narrativa das seções e cruzar a página em zigue-zague.
+// O conteúdo ocupa quase toda a largura, então a fita CORRE PELAS BORDAS
+// (faixas sempre livres de texto) e só cruza o centro UMA vez, com a diagonal
+// centrada no vão vazio entre Manifesto e Princípios (onde os dois lados estão
+// livres). Assim a fita nunca passa por cima das colunas de texto.
 export const ANCHORS: Anchor[] = [
-  { xf: 0.5, yf: 0.0 }, // nasce no centro (herança do hero)
-  { xf: 0.5, yf: 0.05 },
-  { xf: 0.18, yf: 0.13 }, // vira à esquerda (manifesto)
-  { xf: 0.18, yf: 0.24 },
-  { xf: 0.82, yf: 0.33 }, // cruza p/ direita (princípios)
-  { xf: 0.82, yf: 0.45 },
-  { xf: 0.2, yf: 0.53 }, // volta à esquerda (serviços)
-  { xf: 0.2, yf: 0.63 },
-  { xf: 0.8, yf: 0.71 }, // direita (processo)
-  { xf: 0.8, yf: 0.82 },
-  { xf: 0.5, yf: 0.89 }, // recentraliza (projetos)
-  { xf: 0.5, yf: 0.97 }, // culmina no contato
+  { xf: 0.5, yf: 0.0 }, // nasce no centro (herança do hero, atrás da logo)
+  { xf: 0.5, yf: 0.055 },
+  { xf: 0.0, yf: 0.15 }, // desce para a borda esquerda (manifesto: lado esq. vazio)
+  { xf: 0.0, yf: 0.175 },
+  { xf: 1.0, yf: 0.27 }, // única travessia — diagonal centrada no vão manifesto/princípios
+  { xf: 1.0, yf: 0.42 }, // borda direita (princípios)
+  { xf: 1.0, yf: 0.56 }, // borda direita (serviços)
+  { xf: 1.0, yf: 0.66 }, // borda direita (processo)
+  { xf: 1.0, yf: 0.75 }, // borda direita (diferença)
+  { xf: 1.0, yf: 0.84 }, // borda direita (projetos)
+  { xf: 1.0, yf: 0.93 }, // borda direita (contato)
+  { xf: 1.0, yf: 0.99 }, // culmina no canto inferior direito
 ];
 
 const ISO_SLOPE = Math.tan((30 * Math.PI) / 180); // 30° => dy = slope*|dx|
@@ -33,7 +36,9 @@ const ISO_SLOPE = Math.tan((30 * Math.PI) / 180); // 30° => dy = slope*|dx|
  * Margens laterais são respeitadas para a fita não colar nas bordas.
  */
 export function buildRibbonPath(w: number, h: number): string {
-  const margin = Math.max(24, Math.min(w * 0.08, 120));
+  // Inset pequeno: a fita encosta nas bordas (dentro do padding do container,
+  // à esquerda/direita de todo o texto), não no meio do conteúdo.
+  const margin = Math.max(16, Math.min(w * 0.02, 28));
   const usableW = w - margin * 2;
 
   const pts = ANCHORS.map((a) => ({
@@ -68,13 +73,17 @@ export function buildRibbonPath(w: number, h: number): string {
   return d;
 }
 
-/** Variante mobile: percurso mais estreito e vertical (menos travessias). */
+/**
+ * Variante mobile: no celular o texto é uma coluna única de largura cheia,
+ * então a fita se mantém na BORDA ESQUERDA (única faixa livre de texto), com
+ * pequenas dobras isométricas dentro do gutter — nunca cruza o conteúdo.
+ */
 export function buildRibbonPathMobile(w: number, h: number): string {
-  const left = Math.max(18, w * 0.12);
-  const right = w - left;
-  const mid = w * 0.5;
-  const xs = [mid, mid, left, left, right, right, left, left, right, right, mid, mid];
-  const pts = ANCHORS.map((a, i) => ({ x: clampX(xs[i], left, right), y: a.yf * h }));
+  const edge = Math.max(10, w * 0.035); // encostada à esquerda, dentro do gutter
+  const notch = edge + Math.max(14, w * 0.05); // dobra rasa, ainda antes do texto
+  // Alterna borda/dobra para dar o caráter de fita dobrada, sem sair do gutter.
+  const xs = [edge, edge, notch, notch, edge, edge, notch, notch, edge, edge, notch, edge];
+  const pts = ANCHORS.map((a, i) => ({ x: xs[i], y: a.yf * h }));
 
   let d = `M ${round(pts[0].x)} ${round(pts[0].y)}`;
   let cur = pts[0];
@@ -93,9 +102,6 @@ export function buildRibbonPathMobile(w: number, h: number): string {
   return d;
 }
 
-function clampX(x: number, lo: number, hi: number) {
-  return Math.max(lo, Math.min(hi, x));
-}
 function round(n: number) {
   return Math.round(n * 10) / 10;
 }
