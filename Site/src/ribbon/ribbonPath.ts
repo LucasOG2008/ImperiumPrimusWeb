@@ -10,23 +10,31 @@
 export type Anchor = { xf: number; yf: number }; // frações de largura/altura
 
 // Âncoras do percurso (topo → base). xf: 0 = esquerda, 1 = direita.
-// O conteúdo ocupa quase toda a largura, então a fita CORRE PELAS BORDAS
-// (faixas sempre livres de texto) e só cruza o centro UMA vez, com a diagonal
-// centrada no vão vazio entre Manifesto e Princípios (onde os dois lados estão
-// livres). Assim a fita nunca passa por cima das colunas de texto.
+// A fita faz um ZIGUE-ZAGUE espalhado, alternando entre a faixa esquerda e a
+// direita a cada seção. Para não passar por cima de texto, cada seção reserva
+// uma "faixa da fita" no lado correspondente (o conteúdo se afasta — ver
+// `--ribbon-lane` em sections.css). As travessias ficam centradas nos vãos
+// entre seções, onde o miolo está vazio.
+const L = 0.14; // faixa esquerda
+const R = 0.86; // faixa direita
 export const ANCHORS: Anchor[] = [
   { xf: 0.5, yf: 0.0 }, // nasce no centro (herança do hero, atrás da logo)
-  { xf: 0.5, yf: 0.055 },
-  { xf: 0.0, yf: 0.15 }, // desce para a borda esquerda (manifesto: lado esq. vazio)
-  { xf: 0.0, yf: 0.175 },
-  { xf: 1.0, yf: 0.27 }, // única travessia — diagonal centrada no vão manifesto/princípios
-  { xf: 1.0, yf: 0.42 }, // borda direita (princípios)
-  { xf: 1.0, yf: 0.56 }, // borda direita (serviços)
-  { xf: 1.0, yf: 0.66 }, // borda direita (processo)
-  { xf: 1.0, yf: 0.75 }, // borda direita (diferença)
-  { xf: 1.0, yf: 0.84 }, // borda direita (projetos)
-  { xf: 1.0, yf: 0.93 }, // borda direita (contato)
-  { xf: 1.0, yf: 0.99 }, // culmina no canto inferior direito
+  { xf: 0.5, yf: 0.05 },
+  { xf: L, yf: 0.13 }, // → esquerda (manifesto)
+  { xf: L, yf: 0.185 },
+  { xf: R, yf: 0.25 }, // → direita (princípios)
+  { xf: R, yf: 0.36 },
+  { xf: L, yf: 0.43 }, // → esquerda (serviços)
+  { xf: L, yf: 0.51 },
+  { xf: R, yf: 0.575 }, // → direita (processo)
+  { xf: R, yf: 0.61 },
+  { xf: L, yf: 0.68 }, // → esquerda (diferença)
+  { xf: L, yf: 0.705 },
+  { xf: R, yf: 0.77 }, // → direita (projetos)
+  { xf: R, yf: 0.79 },
+  { xf: L, yf: 0.855 }, // → esquerda (contato)
+  { xf: L, yf: 0.95 },
+  { xf: L, yf: 0.99 }, // culmina no canto inferior esquerdo
 ];
 
 const ISO_SLOPE = Math.tan((30 * Math.PI) / 180); // 30° => dy = slope*|dx|

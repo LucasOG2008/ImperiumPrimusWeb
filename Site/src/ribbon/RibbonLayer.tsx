@@ -13,9 +13,9 @@ type Props = {
 /**
  * Camada única e persistente da fita: um SVG absoluto cobrindo todo o documento,
  * com UM path mestre. Um trilho discreto (band) fica sempre visível; por cima,
- * uma FITA BRANCA quadriculada (textura de grade, herança geométrica da logo)
- * vai sendo "desenrolada" conforme o scroll — revelada por uma máscara que
- * avança de cima para baixo. Vira o fio condutor e o indicador de progresso.
+ * uma FITA BRANCA sólida vai sendo "desenrolada" conforme o scroll — revelada
+ * por uma máscara que avança de cima para baixo. Vira o fio condutor e o
+ * indicador de progresso da experiência inteira.
  */
 export default function RibbonLayer({ contentRef }: Props) {
   const reduced = useReducedMotion();
@@ -103,11 +103,6 @@ export default function RibbonLayer({ contentRef }: Props) {
       focusable="false"
     >
       <defs>
-        {/* Textura quadriculada da fita (grade fina, herança geométrica da logo) */}
-        <pattern id="ribbonGrid" width="9" height="9" patternUnits="userSpaceOnUse">
-          <path className="ribbon__grid-line" d="M9 0V9M0 9H9" fill="none" />
-        </pattern>
-
         {/* Máscara de desenrolar: o traço branco avança no scroll e revela a fita */}
         <mask id="ribbonReveal" maskUnits="userSpaceOnUse">
           <path
@@ -127,10 +122,9 @@ export default function RibbonLayer({ contentRef }: Props) {
         fill="none"
       />
 
-      {/* Fita branca quadriculada — revelada pela máscara conforme o scroll */}
+      {/* Fita branca sólida — revelada pela máscara conforme o scroll */}
       <g mask="url(#ribbonReveal)">
         <path className="ribbon__tape" d={d} fill="none" />
-        <path className="ribbon__grid" d={d} fill="none" />
       </g>
     </svg>
   );

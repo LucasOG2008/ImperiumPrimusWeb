@@ -26,19 +26,6 @@
   stroke-miterlimit: 8;
 }
 
-/* Grade quadriculada sobre a fita (linhas finas escuras). */
-.ribbon__grid {
-  stroke: url(#ribbonGrid);
-  stroke-width: var(--ribbon-w);
-  stroke-linejoin: miter;
-  stroke-linecap: butt;
-  stroke-miterlimit: 8;
-}
-.ribbon__grid-line {
-  stroke: rgba(5, 5, 6, 0.4);
-  stroke-width: 1.2;
-}
-
 /* Traço da máscara: branco = revelado. Levemente mais largo que a fita para
    cobrir as bordas anti-aliased. O desenrolar é feito via stroke-dashoffset. */
 .ribbon__reveal {
@@ -49,6 +36,3 @@
   stroke-miterlimit: 8;
 }
 
-@media (max-width: 768px) {
-  .ribbon__grid-line { stroke-width: 1; }
-}

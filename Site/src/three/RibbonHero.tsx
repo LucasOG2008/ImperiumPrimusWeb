@@ -104,7 +104,7 @@ function Logo({
   // scale.y negativo: SVG tem eixo Y para baixo; invertendo, a logo fica de pé.
   // position x: desloca à direita para compor com o título (como a versão PNG).
   return (
-    <group ref={group} position={[0.7, 0, 0]}>
+    <group ref={group} position={[1.6, 0, 0]}>
       <group scale={[scale, -scale, scale]}>
         {pieces.map((p, i) => (
           <mesh key={i} ref={(m) => (meshes.current[i] = m)} geometry={p.geom}>

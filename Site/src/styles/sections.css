@@ -21,6 +21,29 @@ section[id] {
   margin-bottom: var(--space-5);
 }
 
+/* --- Faixa da fita ---------------------------------------------------------
+   A fita zigue-zagueia alternando entre a faixa esquerda e a direita. Cada
+   seção reserva essa faixa no seu lado, afastando o conteúdo, para a fita
+   nunca cruzar texto. Só no desktop (no mobile a fita cola na borda). */
+@media (min-width: 768px) {
+  :root {
+    --ribbon-lane: clamp(96px, 12vw, 172px);
+  }
+  /* fita à ESQUERDA → conteúdo empurrado para a direita */
+  #manifesto > .container,
+  #servicos > .container,
+  #diferenca > .container,
+  #contato > .container {
+    padding-inline-start: calc(var(--gutter) + var(--ribbon-lane));
+  }
+  /* fita à DIREITA → conteúdo empurrado para a esquerda */
+  #principios > .container,
+  #processo > .container,
+  #projetos > .container {
+    padding-inline-end: calc(var(--gutter) + var(--ribbon-lane));
+  }
+}
+
 /* =============================== HERO ====================================== */
 .hero {
   position: relative;
@@ -49,7 +72,7 @@ section[id] {
 }
 /* Logo REAL: screen apaga o preto da PNG; sobra o monograma limpo. */
 .hero__logo {
-  --logo-x: 16%;
+  --logo-x: 30%;
   width: min(66vmin, 560px);
   height: auto;
   object-fit: contain;
