@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { nav, brand } from "../content/site";
+import ipMark from "../assets/ip-mark-trace.svg";
 import "./Header.css";
 
 export default function Header() {
@@ -49,7 +50,7 @@ export default function Header() {
         <a href="#top" className="brandmark" aria-label={`${brand.name} — início`} onClick={close}>
           <img
             className="brandmark__glyph"
-            src="/ip-mark.png"
+            src={ipMark}
             alt=""
             width={34}
             height={34}

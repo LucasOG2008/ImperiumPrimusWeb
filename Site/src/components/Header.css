@@ -49,8 +49,7 @@
   width: 34px;
   height: 34px;
   object-fit: contain;
-  /* screen apaga o fundo preto da PNG, deixando só o monograma */
-  mix-blend-mode: screen;
+  /* SVG vetorial com fundo transparente — sem truque de blend */
   transition: transform var(--dur-base) var(--ease-out);
 }
 .brandmark:hover .brandmark__glyph {
