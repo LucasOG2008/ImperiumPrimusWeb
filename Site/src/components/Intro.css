@@ -1,0 +1,60 @@
+/* Overlay da intro — acima de tudo (grão z=100, header z=40). */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.intro:focus-visible {
+  outline: none;
+}
+
+/* Fundo preto que revela o site ao desaparecer. Vinheta fria sutil atrás da
+   logo para não ser um preto chapado. */
+.intro__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 45% at 50% 50%, rgba(111, 168, 255, 0.06), transparent 70%),
+    var(--void);
+}
+
+/* Wrapper da logo — alvo das transformações do GSAP (translate + scale). */
+.intro__logo {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(38vmin, 190px);
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.intro__glyph {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 0 34px rgba(111, 168, 255, 0.18));
+  /* Pulso extremamente sutil (afordância de clique) — usa a propriedade `scale`
+     e `opacity`, sem tocar em `transform` (que fica com o GSAP no wrapper). */
+  animation: introPulse 2.6s var(--ease-in-out) infinite;
+}
+@keyframes introPulse {
+  0%, 100% { scale: 1; opacity: 0.9; }
+  50% { scale: 1.045; opacity: 1; }
+}
+/* Ao iniciar a saída, congela o pulso para a viagem ficar limpa. */
+.intro__logo.is-leaving .intro__glyph {
+  animation: none;
+  scale: 1;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro__glyph {
+    animation: none;
+  }
+}

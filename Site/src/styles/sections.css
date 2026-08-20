@@ -21,25 +21,43 @@ section[id] {
   margin-bottom: var(--space-5);
 }
 
-/* --- Faixa da fita ---------------------------------------------------------
-   A fita zigue-zagueia alternando entre a faixa esquerda e a direita. Cada
-   seção reserva essa faixa no seu lado, afastando o conteúdo, para a fita
-   nunca cruzar texto. Só no desktop (no mobile a fita cola na borda). */
+/* --- Faixa da fita (lado ALTERNADO por seção) ------------------------------
+   A fita cruza a página esquerda↔direita↔esquerda. Cada seção reserva a
+   "faixa da fita" no SEU lado (padding-inline-start OU -end); o conteúdo se
+   afasta e a fita corre pelo lado livre. O x real da fita é medido no DOM
+   (RibbonLayer) a partir desse padding — então a trajetória se adapta ao
+   conteúdo em qualquer largura, e as TRAVESSIAS acontecem só nos vãos vazios
+   entre seções (nunca sobre texto/cards/botões). No mobile a alternância
+   cansaria numa coluna estreita, então tudo vira uma faixa fina à esquerda. */
+:root {
+  --ribbon-lane: 22px;
+}
+/* Base (mobile): faixa fina à esquerda para todas as colunas de conteúdo. */
+.section > .container,
+.hero .hero__content,
+.site-footer > .container--wide {
+  padding-inline-start: calc(var(--gutter) + var(--ribbon-lane));
+}
+
 @media (min-width: 768px) {
   :root {
-    --ribbon-lane: clamp(96px, 12vw, 172px);
+    --ribbon-lane: clamp(76px, 8vw, 128px);
   }
-  /* fita à ESQUERDA → conteúdo empurrado para a direita */
+  /* Fita à ESQUERDA → conteúdo empurrado para a direita. */
+  #top .hero__content,
+  #principios > .container,
+  #processo > .container,
+  #projetos > .container,
+  .site-footer > .container--wide {
+    padding-inline-start: calc(var(--gutter) + var(--ribbon-lane));
+    padding-inline-end: var(--gutter);
+  }
+  /* Fita à DIREITA → conteúdo empurrado para a esquerda. */
   #manifesto > .container,
   #servicos > .container,
   #diferenca > .container,
   #contato > .container {
-    padding-inline-start: calc(var(--gutter) + var(--ribbon-lane));
-  }
-  /* fita à DIREITA → conteúdo empurrado para a esquerda */
-  #principios > .container,
-  #processo > .container,
-  #projetos > .container {
+    padding-inline-start: var(--gutter);
     padding-inline-end: calc(var(--gutter) + var(--ribbon-lane));
   }
 }
@@ -47,10 +65,13 @@ section[id] {
 /* =============================== HERO ====================================== */
 .hero {
   position: relative;
+  /* altura real da janela (dvh corrige a barra do mobile). O topo já reserva a
+     navbar (~84px condensa p/ 64px). Conteúdo dimensionado p/ caber sem rolar. */
   min-height: 100svh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
-  padding-block: clamp(7rem, 12vh, 12rem) var(--space-8);
+  padding-block: clamp(6rem, 14vh, 9rem) clamp(2.5rem, 6vh, 4.5rem);
   overflow: clip;
 }
 /* Vinheta sutil — aprofunda os cantos e assenta o mark/tipografia. */
@@ -115,14 +136,17 @@ section[id] {
   width: 100%;
 }
 .hero__eyebrow {
-  margin-bottom: var(--space-5);
+  margin-bottom: clamp(0.75rem, 2.5vh, 1.5rem);
 }
 .hero__title {
-  font-size: var(--step-6);
-  line-height: 0.94;
-  letter-spacing: -0.04em;
+  /* Título dimensionado por largura E altura (min(vw, vh)) — assim a primeira
+     dobra inteira cabe sem rolar, inclusive em notebooks de tela baixa, sem
+     abrir mão do impacto em telas altas. */
+  font-size: clamp(2.6rem, min(11vw, 13vh), 6.6rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
   font-weight: 600;
-  max-width: 15ch;
+  max-width: 16ch;
 }
 .hero__line {
   display: block;
@@ -148,21 +172,23 @@ section[id] {
   background: linear-gradient(90deg, var(--edge), transparent 70%);
 }
 .hero__lead {
-  margin-top: var(--space-6);
-  max-width: 46ch;
+  margin-top: clamp(1rem, 3vh, 2rem);
+  max-width: 52ch;
   color: var(--paper-dim);
-  font-size: var(--step-1);
-  line-height: var(--leading-snug);
+  /* subtítulo bem menor — só apoio ao título, sem competir com ele */
+  font-size: clamp(0.82rem, 0.78rem + 0.2vw, 0.95rem);
+  line-height: var(--leading-body);
 }
 .hero__actions {
-  margin-top: var(--space-7);
+  margin-top: clamp(1.25rem, 3.5vh, 3rem);
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
 }
 .hero__scroll {
   position: absolute;
-  left: var(--gutter);
+  /* alinhado à coluna de conteúdo, à direita da faixa da fita */
+  left: calc(var(--gutter) + var(--ribbon-lane));
   bottom: var(--space-6);
   z-index: 3;
   display: flex;
@@ -201,15 +227,22 @@ section[id] {
   transform: translateY(16px);
   animation: heroIn var(--dur-slow) var(--ease-out) forwards;
 }
-[data-hero="1"] { animation-delay: 0.15s; }
-[data-hero="2"] { transform: translateY(105%); animation-name: heroLine; animation-delay: 0.3s; }
-[data-hero="3"] { animation-delay: 0.85s; }
-[data-hero="4"] { animation-delay: 1s; }
+[data-hero="1"] { animation-delay: 0.12s; }
+[data-hero="2"] { transform: translateY(105%); animation-name: heroLine; animation-delay: 0.24s; }
+[data-hero="3"] { animation-delay: 0.5s; }
+[data-hero="4"] { animation-delay: 0.64s; }
 @keyframes heroIn {
   to { opacity: 1; transform: none; }
 }
 @keyframes heroLine {
   to { opacity: 1; transform: none; }
+}
+
+/* Telas baixas (notebooks / paisagem): esconde a dica de scroll para não
+   competir com os CTAs pela altura da primeira dobra. */
+@media (max-height: 660px) {
+  .hero__scroll { display: none; }
+  .hero { padding-block: clamp(5rem, 12vh, 6.5rem) clamp(1.5rem, 4vh, 2.5rem); }
 }
 
 @media (max-width: 720px) {

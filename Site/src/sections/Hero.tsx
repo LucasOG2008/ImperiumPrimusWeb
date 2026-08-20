@@ -36,15 +36,38 @@ export default function Hero() {
     // O hero 3D carrega em desktop sempre que houver WebGL. Quando o usuário
     // pede menos movimento, a logo aparece extrudada porém PARADA (sem a
     // animação de entrada/flutuação) — todos veem o 3D, respeitando a preferência.
-    if (supportsWebGL() && window.innerWidth > 720) {
-      const id = window.requestIdleCallback
+    if (!(supportsWebGL() && window.innerWidth > 720)) return;
+
+    let idle: number | undefined;
+    let cancelled = false;
+    const clearIdle = () => {
+      if (idle === undefined) return;
+      if (window.cancelIdleCallback) window.cancelIdleCallback(idle);
+      else clearTimeout(idle);
+    };
+    const startIdle = () => {
+      if (cancelled) return;
+      idle = window.requestIdleCallback
         ? window.requestIdleCallback(() => setUse3D(true))
         : window.setTimeout(() => setUse3D(true), 200);
+    };
+
+    // Se a intro está rodando, só monta o canvas quando ela terminar — assim a
+    // animação de abertura fica fluida (o canvas 3D não disputa o rAF com ela).
+    if (document.documentElement.classList.contains("intro-active")) {
+      window.addEventListener("intro:done", startIdle, { once: true });
       return () => {
-        if (window.cancelIdleCallback) window.cancelIdleCallback(id as number);
-        else clearTimeout(id as number);
+        cancelled = true;
+        window.removeEventListener("intro:done", startIdle);
+        clearIdle();
       };
     }
+
+    startIdle();
+    return () => {
+      cancelled = true;
+      clearIdle();
+    };
   }, []);
 
   return (

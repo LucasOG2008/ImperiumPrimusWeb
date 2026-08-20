@@ -240,6 +240,23 @@ p { text-wrap: pretty; }
   transform: none;
 }
 
+/* --- Gate da intro --------------------------------------------------------
+   Enquanto a abertura roda (html.intro-active), seguramos as animações de
+   entrada do hero e escondemos a logo do header. A logo da intro pousa
+   exatamente sobre a do header, que só então aparece — sem "corte" nem duas
+   logos. Ao liberar, o hero revela-se em leve sequência. */
+html.intro-active [data-hero] {
+  animation-play-state: paused !important;
+}
+html.intro-active .hero__logo {
+  animation-play-state: paused !important;
+  opacity: 0;
+}
+/* Toggle instantâneo (sem transição) → a troca sob a logo da intro é invisível. */
+html.intro-active .brandmark__glyph {
+  opacity: 0;
+}
+
 /* Reduced motion: sem transform, revelação instantânea e suave */
 @media (prefers-reduced-motion: reduce) {
   *,

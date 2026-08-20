@@ -1,59 +1,66 @@
 /* =============================================================================
-   GERADOR DA FITA CONTÍNUA
-   Uma única polilinha rígida em coordenadas de PÍXEL (documento inteiro).
-   Regras que garantem o look "engenharia / isométrico" da logo:
-     - só segmentos verticais + diagonais de UMA MESMA inclinação (paralelas);
-     - dobras em canto vivo (sem curva orgânica);
-     - conectores em degrau: vertical → diagonal iso → vertical.
+   GERADOR DA FITA CONTÍNUA — travessias esquerda↔direita guiadas pelo conteúdo.
+
+   A fita cruza a página alternando o lado (esq → dir → esq → dir …). Para nunca
+   passar por cima de conteúdo, o traçado é MEDIDO no DOM (ver RibbonLayer):
+     - cada seção tem uma "faixa" reservada no seu lado (padding em sections.css);
+       o segmento VERTICAL da fita corre por essa faixa, sempre ao lado do texto.
+     - a TRAVESSIA de um lado para o outro acontece só no VÃO VAZIO entre duas
+       seções (entre o fim do conteúdo de uma e o começo da próxima), faixa que
+       é garantidamente livre em toda a largura.
+     - ao CHEGAR na próxima seção, a diagonal para bem ACIMA do conteúdo e só
+       então desce reto (já na faixa lateral, longe do texto). Isso dá folga
+       generosa mesmo com títulos grandes e largos.
+
+   Identidade preservada: só verticais + degraus/diagonais de canto vivo.
    ============================================================================= */
 
-export type Anchor = { xf: number; yf: number }; // frações de largura/altura
+/** Segmento medido de uma seção: x da fita (na faixa do seu lado) + topo/base
+ *  do CONTEÚDO (não da seção) em coordenadas do documento. */
+export type Seg = { x: number; top: number; bottom: number };
 
-// Âncoras do percurso (topo → base). xf: 0 = esquerda, 1 = direita.
-// A fita faz um ZIGUE-ZAGUE espalhado, alternando entre a faixa esquerda e a
-// direita a cada seção. Para não passar por cima de texto, cada seção reserva
-// uma "faixa da fita" no lado correspondente (o conteúdo se afasta — ver
-// `--ribbon-lane` em sections.css). As travessias ficam centradas nos vãos
-// entre seções, onde o miolo está vazio.
-const L = 0.14; // faixa esquerda
-const R = 0.86; // faixa direita
-export const ANCHORS: Anchor[] = [
-  { xf: 0.5, yf: 0.0 }, // nasce no centro (herança do hero, atrás da logo)
-  { xf: 0.5, yf: 0.05 },
-  { xf: L, yf: 0.13 }, // → esquerda (manifesto)
-  { xf: L, yf: 0.185 },
-  { xf: R, yf: 0.25 }, // → direita (princípios)
-  { xf: R, yf: 0.36 },
-  { xf: L, yf: 0.43 }, // → esquerda (serviços)
-  { xf: L, yf: 0.51 },
-  { xf: R, yf: 0.575 }, // → direita (processo)
-  { xf: R, yf: 0.61 },
-  { xf: L, yf: 0.68 }, // → esquerda (diferença)
-  { xf: L, yf: 0.705 },
-  { xf: R, yf: 0.77 }, // → direita (projetos)
-  { xf: R, yf: 0.79 },
-  { xf: L, yf: 0.855 }, // → esquerda (contato)
-  { xf: L, yf: 0.95 },
-  { xf: L, yf: 0.99 }, // culmina no canto inferior esquerdo
-];
+type Pt = { x: number; y: number; clear?: boolean };
 
 const ISO_SLOPE = Math.tan((30 * Math.PI) / 180); // 30° => dy = slope*|dx|
+const ARRIVE = 64; // folga vertical acima do conteúdo ao chegar numa travessia
 
 /**
- * Constrói o `d` da fita para um documento de dimensões (w × h).
- * Margens laterais são respeitadas para a fita não colar nas bordas.
+ * Monta o `d` da fita a partir dos segmentos medidos (topo → base).
+ *
+ * @param lead âncoras de ENTRADA opcionais, prependadas antes do 1º segmento.
+ *   Ex.: o "colchete" de canto reto no topo (stub vertical saindo da logo →
+ *   trecho horizontal → desce no corredor do hero). A última âncora do lead deve
+ *   estar no x do 1º segmento (a descida vertical até o conteúdo é automática).
+ *   Se ausente, a fita nasce no topo do conteúdo do 1º segmento (abaixo da barra).
  */
-export function buildRibbonPath(w: number, h: number): string {
-  // Inset pequeno: a fita encosta nas bordas (dentro do padding do container,
-  // à esquerda/direita de todo o texto), não no meio do conteúdo.
-  const margin = Math.max(16, Math.min(w * 0.02, 28));
-  const usableW = w - margin * 2;
+export function buildRibbonPath(segs: Seg[], h: number, lead?: { x: number; y: number }[]): string {
+  if (!segs.length) return "";
 
-  const pts = ANCHORS.map((a) => ({
-    x: margin + a.xf * usableW,
-    y: a.yf * h,
-  }));
+  const pts: Pt[] = [];
+  if (lead) lead.forEach((p) => pts.push({ x: p.x, y: p.y }));
 
+  segs.forEach((s, i) => {
+    // `clear` marca as travessias ENTRE seções (i > 0): a chegada para acima do
+    // conteúdo. A chegada no 1º segmento (hero) não usa folga.
+    pts.push({ x: s.x, y: s.top, clear: i > 0 });
+    pts.push({ x: s.x, y: s.bottom });
+  });
+
+  // Arremate reto até o fim do documento no x do último segmento.
+  pts.push({ x: segs[segs.length - 1].x, y: h });
+
+  return anchorsToPath(pts);
+}
+
+/**
+ * Liga âncoras usando só verticais e degraus. Numa transição com dx != 0:
+ *   - se o vão comporta um degrau iso a 30°, faz vertical → diagonal → vertical;
+ *   - senão (travessia larga em vão estreito) faz uma diagonal única que, quando
+ *     o destino é marcado `clear`, PARA `ARRIVE`px acima do topo do conteúdo e
+ *     desce reto na faixa lateral — nunca encostando no título da seção.
+ * Nunca introduz segmento horizontal (que poderia tocar conteúdo ao lado).
+ */
+function anchorsToPath(pts: Pt[]): string {
   let d = `M ${round(pts[0].x)} ${round(pts[0].y)}`;
   let cur = pts[0];
 
@@ -63,50 +70,29 @@ export function buildRibbonPath(w: number, h: number): string {
     const dy = next.y - cur.y;
 
     if (Math.abs(dx) < 0.5) {
-      // puramente vertical
       d += ` L ${round(next.x)} ${round(next.y)}`;
     } else {
-      // conector em degrau, diagonal com inclinação iso fixa
       const diagDy = ISO_SLOPE * Math.abs(dx);
-      const room = Math.max(dy - diagDy, 0);
-      const y1 = cur.y + room / 2; // fim do 1º trecho vertical
-      const y2 = y1 + diagDy; // fim da diagonal
-      d += ` L ${round(cur.x)} ${round(y1)}`;
-      d += ` L ${round(next.x)} ${round(y2)}`;
-      d += ` L ${round(next.x)} ${round(next.y)}`;
+      if (diagDy > dy) {
+        // Travessia larga. Se o destino pede folga, mira acima do conteúdo e
+        // desce reto; assim a diagonal fica bem acima do título.
+        const clear = next.clear ? Math.min(ARRIVE, Math.max(dy - 8, 0)) : 0;
+        const midY = next.y - clear;
+        d += ` L ${round(next.x)} ${round(midY)}`;
+        if (clear > 0.5) d += ` L ${round(next.x)} ${round(next.y)}`;
+      } else {
+        // Degrau isométrico com a diagonal a 30° centrada no vão.
+        const room = dy - diagDy;
+        const y1 = cur.y + room / 2;
+        const y2 = y1 + diagDy;
+        d += ` L ${round(cur.x)} ${round(y1)}`;
+        d += ` L ${round(next.x)} ${round(y2)}`;
+        d += ` L ${round(next.x)} ${round(next.y)}`;
+      }
     }
     cur = next;
   }
 
-  return d;
-}
-
-/**
- * Variante mobile: no celular o texto é uma coluna única de largura cheia,
- * então a fita se mantém na BORDA ESQUERDA (única faixa livre de texto), com
- * pequenas dobras isométricas dentro do gutter — nunca cruza o conteúdo.
- */
-export function buildRibbonPathMobile(w: number, h: number): string {
-  const edge = Math.max(10, w * 0.035); // encostada à esquerda, dentro do gutter
-  const notch = edge + Math.max(14, w * 0.05); // dobra rasa, ainda antes do texto
-  // Alterna borda/dobra para dar o caráter de fita dobrada, sem sair do gutter.
-  const xs = [edge, edge, notch, notch, edge, edge, notch, notch, edge, edge, notch, edge];
-  const pts = ANCHORS.map((a, i) => ({ x: xs[i], y: a.yf * h }));
-
-  let d = `M ${round(pts[0].x)} ${round(pts[0].y)}`;
-  let cur = pts[0];
-  for (let i = 1; i < pts.length; i++) {
-    const next = pts[i];
-    if (Math.abs(next.x - cur.x) < 0.5) {
-      d += ` L ${round(next.x)} ${round(next.y)}`;
-    } else {
-      const diagDy = ISO_SLOPE * Math.abs(next.x - cur.x);
-      const y1 = cur.y + Math.max((next.y - cur.y - diagDy) / 2, 0);
-      const y2 = y1 + diagDy;
-      d += ` L ${round(cur.x)} ${round(y1)} L ${round(next.x)} ${round(y2)} L ${round(next.x)} ${round(next.y)}`;
-    }
-    cur = next;
-  }
   return d;
 }
 

@@ -8,6 +8,13 @@
   overflow: visible;
 }
 
+/* No mobile a faixa reservada é fina: a fita afina para caber colada à borda. */
+@media (max-width: 767px) {
+  .ribbon {
+    --ribbon-w: 10px;
+  }
+}
+
 /* Trilho da fita: banda discreta sempre visível (cantos vivos, folded-ribbon). */
 .ribbon__band {
   stroke: var(--line);

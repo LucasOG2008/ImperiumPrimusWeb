@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Header from "./components/Header";
+import Intro from "./components/Intro";
 import RibbonLayer from "./ribbon/RibbonLayer";
 import Hero from "./sections/Hero";
 import Manifesto from "./sections/Manifesto";
@@ -46,6 +47,7 @@ export default function App() {
       <a className="skip-link" href="#manifesto">
         Pular para o conteúdo
       </a>
+      <Intro />
       <Header />
 
       <div className="app" ref={contentRef}>
